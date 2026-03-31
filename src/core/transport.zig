@@ -1,0 +1,82 @@
+const std = @import("std");
+const Config = @import("config.zig").Config;
+const energy = @import("energy.zig");
+const pressure = @import("pressure.zig");
+
+pub const BlockResult = struct {
+    accepted: bool,
+    before_energy: u64,
+    after_energy: u64,
+};
+
+pub fn resolveTargets(desired: []const usize, source_to_final: []usize) void {
+    std.debug.assert(source_to_final.len >= desired.len);
+
+    var order: [Config.max_block_size]usize = undefined;
+    for (desired, 0..) |_, i| order[i] = i;
+
+    var i: usize = 1;
+    while (i < desired.len) : (i += 1) {
+        const current = order[i];
+        var j = i;
+        while (j > 0) {
+            const prev = order[j - 1];
+            const current_target = desired[current];
+            const prev_target = desired[prev];
+            if (prev_target < current_target) break;
+            if (prev_target == current_target and prev < current) break;
+            order[j] = prev;
+            j -= 1;
+        }
+        order[j] = current;
+    }
+
+    for (order[0..desired.len], 0..) |source_index, final_index| {
+        source_to_final[source_index] = final_index;
+    }
+}
+
+pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config) BlockResult {
+    std.debug.assert(block.len <= Config.max_block_size);
+
+    const before_energy = energy.blockEnergy(T, block, cfg);
+    if (block.len <= 1 or before_energy == 0) {
+        return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
+    }
+
+    var pressures: [Config.max_block_size]i32 = undefined;
+    var proposals: [Config.max_block_size]i8 = undefined;
+    var desired: [Config.max_block_size]usize = undefined;
+    var source_to_final: [Config.max_block_size]usize = undefined;
+    var candidate: [Config.max_block_size]T = undefined;
+
+    pressure.compute(T, block, cfg, pressures[0..block.len]);
+    pressure.proposalsFromPressure(pressures[0..block.len], cfg, proposals[0..block.len]);
+
+    var changed = false;
+    for (block, 0..) |_, i| {
+        const displacement: isize = @intCast(proposals[i]);
+        const unclamped: isize = @as(isize, @intCast(i)) + displacement;
+        const upper: isize = @intCast(block.len - 1);
+        const clamped = std.math.clamp(unclamped, @as(isize, 0), upper);
+        desired[i] = @intCast(clamped);
+        changed = changed or desired[i] != i;
+    }
+
+    if (!changed) {
+        return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
+    }
+
+    resolveTargets(desired[0..block.len], source_to_final[0..block.len]);
+    for (block, 0..) |value, source_index| {
+        candidate[source_to_final[source_index]] = value;
+    }
+
+    const after_energy = energy.blockEnergy(T, candidate[0..block.len], cfg);
+    if (after_energy >= before_energy) {
+        return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
+    }
+
+    std.mem.copyForwards(T, block, candidate[0..block.len]);
+    return .{ .accepted = true, .before_energy = before_energy, .after_energy = after_energy };
+}
