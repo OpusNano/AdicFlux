@@ -29,9 +29,10 @@ This document tracks the next correctness-first phase as repository-visible work
 
 ## Current open items
 
-- [ ] Record the first real citations in `docs/literature-review-log.md`
+- [x] Record the first real citations in `docs/literature-review-log.md`
 - [ ] Decide whether the tagged-evidence stability wording should remain as-is or be strengthened further only after broader search coverage
 - [ ] Review whether `isSorted` should gain a short code comment/doc comment in the Zig source itself
+- [ ] Add more citations beyond the initial odd-even / local-exchange baseline entries
 
 ## Suggested issue buckets
 

@@ -35,7 +35,7 @@ Accepted transport moves only establish a local fact: the chosen block-local wei
 
 ## Stability status
 
-The current implementation aims to behave stably for equal integer keys, but that should be treated as an intended property rather than a proved guarantee.
+The current implementation should be treated as test-supported for stability, not stability-proved.
 
 - cleanup swaps only strict inversions,
 - equal pairs contribute no direct pressure,

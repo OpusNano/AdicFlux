@@ -116,4 +116,6 @@ Avoid stronger novelty phrasing until the checklist above has been worked throug
 
 See `docs/literature-review-log.md` for the active source-backed task log derived from this checklist.
 
+The first recorded citations currently reinforce a conservative split: the exact cleanup stage belongs to established odd-even/transposition sorting background, while the weighted 2-adic transport proposal remains the genuinely experimental part of the repository.
+
 Until that review is done, "experimental algorithm proposal" is the right framing.
