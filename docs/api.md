@@ -28,6 +28,10 @@ pub fn isSorted(comptime T: type, xs: []const T) bool
 
 Checks whether a slice is nondecreasing under AdicFlux's key ordering.
 
+`isSorted` is an intentional part of the public API. It exists as a small validation helper for examples, tests, and user code that experiments with non-default configurations such as `cleanup_pass_limit`, where a caller may intentionally request a diagnostic run that does not complete the exact cleanup stage.
+
+The function is not performance-critical and is not required for ordinary sorting, but it is stable enough to document and support as a public semantic helper.
+
 ## `Config`
 
 ### `block_size`

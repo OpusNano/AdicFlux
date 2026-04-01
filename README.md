@@ -80,6 +80,8 @@ adicflux.sortWithConfig(i64, xs[0..], cfg);
 
 `cleanup_pass_limit` is also available for diagnostic/testing runs. Leaving it as `null` preserves the exactness guarantee. Supplying a finite limit may stop cleanup early and therefore may leave the array not fully sorted.
 
+For those diagnostic runs, `adicflux.isSorted(T, xs)` remains part of the public API as a small validation helper that checks the library's ordering semantics directly.
+
 ## Layout
 
 - `src/adicflux.zig` public API.
@@ -90,6 +92,7 @@ adicflux.sortWithConfig(i64, xs[0..], cfg);
 ## Additional docs
 
 - `docs/api.md` public API and configuration semantics.
+- `docs/literature-review-log.md` active source-backed review tasks for positioning.
 - `docs/progress.md` current next-phase checklist and work buckets.
 - `docs/stability.md` current stability status and proof gap.
 - `docs/positioning.md` conservative positioning relative to nearby sort families.

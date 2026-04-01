@@ -13,15 +13,25 @@ This document tracks the next correctness-first phase as repository-visible work
 - [x] Debug counters for transport and cleanup
 - [x] Tagged-identity stability harness
 - [x] Stats-based accounting tests for cleanup limits and multi-block work
+- [x] `isSorted` public API decision documented
+- [x] Benchmark-readiness checklist v1 frozen
+- [x] Source-backed literature review task log activated
+- [x] Stability wording updated to reflect tagged-evidence status
 
 ## Active next-phase checklist
 
-- [ ] Decide whether tagged-identity evidence is strong enough to strengthen or further narrow stability wording
+- [x] Decide whether tagged-identity evidence is strong enough to strengthen or further narrow stability wording
 - [x] Add more stats-based convergence tests around transport acceptance and cleanup work
 - [x] Expand literature-positioning notes into a review checklist with citations/tasks
-- [ ] Open source-backed literature review tasks from the new checklist
-- [ ] Decide whether `isSorted` remains part of the long-term public API
-- [ ] Freeze a benchmark-readiness checklist version before any benchmark harness is added
+- [x] Open source-backed literature review tasks from the new checklist
+- [x] Decide whether `isSorted` remains part of the long-term public API
+- [x] Freeze a benchmark-readiness checklist version before any benchmark harness is added
+
+## Current open items
+
+- [ ] Record the first real citations in `docs/literature-review-log.md`
+- [ ] Decide whether the tagged-evidence stability wording should remain as-is or be strengthened further only after broader search coverage
+- [ ] Review whether `isSorted` should gain a short code comment/doc comment in the Zig source itself
 
 ## Suggested issue buckets
 
@@ -41,5 +51,6 @@ This document tracks the next correctness-first phase as repository-visible work
 
 - literature review checklist
 - source-backed literature review issues
+- literature review log with actual citations
 - algorithm-family comparison notes with citations
 - API surface notes for unstable test support
