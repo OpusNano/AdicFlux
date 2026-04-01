@@ -29,11 +29,11 @@ pub fn exactCleanup(comptime T: type, xs: []T, pass_limit: ?usize, stats: ?*Stat
 
     var pass: usize = 0;
     while (true) : (pass += 1) {
-        if (stats) |s| s.cleanup_rounds += 1;
-
         if (pass_limit) |limit| {
             if (pass >= limit) break;
         }
+
+        if (stats) |s| s.cleanup_rounds += 1;
 
         const swapped_even = oddEvenPass(T, xs, 0, stats);
         const swapped_odd = oddEvenPass(T, xs, 1, stats);

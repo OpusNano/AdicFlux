@@ -37,3 +37,11 @@ This gives the repository a meaningful way to search for equal-key reorderings w
 The primary oracle remains a small insertion-sort reference because it is easy to audit. Test-only scratch buffers are allocated dynamically so larger arrays can still be checked exactly.
 
 The purpose of these reference paths is correctness cross-checking, not performance.
+
+## Stats-based checks
+
+The suite also uses debug counters exposed through unstable test support to verify accounting properties such as:
+
+- transport visited blocks equal accepted plus rejected blocks,
+- cleanup rounds and even/odd pass counts stay consistent,
+- cleanup limits suppress work when explicitly requested for diagnostics.
