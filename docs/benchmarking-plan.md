@@ -2,6 +2,19 @@
 
 This repository intentionally does not publish benchmark numbers yet.
 
+## Hard gate: do not benchmark until all items below are true
+
+- public configuration fields are all semantically implemented or intentionally removed,
+- correctness docs and README agree on exactness and stability wording,
+- transport invariant tests cover acceptance, rejection, and permutation preservation,
+- multi-block randomized tests cover sizes well beyond one block,
+- reference-oracle coverage exists for larger arrays,
+- debug instrumentation can report transport and cleanup work counts,
+- algorithm structure is stable enough that benchmarked defaults are meaningful,
+- benchmark methodology is documented before any numbers are published.
+
+If any item above is false, benchmark work should stay deferred.
+
 Benchmarks should be added only after:
 
 - the algorithm and configuration surface stop changing rapidly,
@@ -28,6 +41,8 @@ Metrics should include:
 - wall-clock time,
 - throughput,
 - allocation behavior,
+- transport acceptance/rejection counts,
+- cleanup pass and swap counts,
 - branch/cache counters where available,
 - sensitivity to block and valuation parameters.
 

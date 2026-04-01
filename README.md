@@ -87,6 +87,12 @@ adicflux.sortWithConfig(i64, xs[0..], cfg);
 - `test/` unit and property-style validation.
 - `docs/` design and correctness notes.
 
+## Additional docs
+
+- `docs/api.md` public API and configuration semantics.
+- `docs/stability.md` current stability status and proof gap.
+- `docs/benchmarking-plan.md` conservative benchmark-readiness gates.
+
 ## Roadmap
 
 - Improve transport policies and acceptance criteria.
