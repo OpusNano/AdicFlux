@@ -91,6 +91,7 @@ adicflux.sortWithConfig(i64, xs[0..], cfg);
 
 - `docs/api.md` public API and configuration semantics.
 - `docs/stability.md` current stability status and proof gap.
+- `docs/positioning.md` conservative positioning relative to nearby sort families.
 - `docs/benchmarking-plan.md` conservative benchmark-readiness gates.
 
 ## Roadmap
