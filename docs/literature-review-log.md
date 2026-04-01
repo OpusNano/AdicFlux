@@ -48,7 +48,7 @@ Capture:
 
 ### Task 3: Bit-structured integer sorting outside radix framing
 
-Status: active
+Status: first citation recorded
 
 Questions:
 
@@ -58,14 +58,14 @@ Questions:
 
 Capture:
 
-- citation:
-- bit-structure role:
-- overlap with AdicFlux:
-- wording impact:
+- citation: Yijie Han and Mikkel Thorup, "Integer sorting in O(n sqrt(log log n)) expected time and linear space," *FOCS 2002*, doi:10.1109/SFCS.2002.1181890.
+- bit-structure role: exploits word-RAM operations and bit-level structure for asymptotically fast integer sorting.
+- overlap with AdicFlux: confirms that there is a broad literature on integer sorting that uses machine-word and bit-structure reasoning without reducing to textbook comparison sorts.
+- wording impact: supports keeping AdicFlux away from any claim that "bit-aware" or "integer-specific" alone is novel; the experimental claim must stay specific to the weighted 2-adic transport formulation and exact-cleanup combination.
 
 ### Task 4: Stability proof techniques for local permutations
 
-Status: active
+Status: first citation recorded
 
 Questions:
 
@@ -75,10 +75,10 @@ Questions:
 
 Capture:
 
-- citation:
-- proof technique:
-- possible transfer to AdicFlux:
-- wording impact:
+- citation: Donald E. Knuth, *The Art of Computer Programming, Volume 3: Sorting and Searching*, 2nd ed., Addison-Wesley, 1998, especially sections on stable sorting and sorting networks.
+- proof technique: classical compare-exchange correctness tools, including 0-1-principle-style reasoning for oblivious compare-exchange networks and careful separation of stability as a distinct semantic property.
+- possible transfer to AdicFlux: useful for framing what cleanup inherits from classical compare-exchange reasoning, but not sufficient by itself to prove stability of contextual transport moves.
+- wording impact: supports the current conservative distinction between test-supported stability behavior and a full proof for the transport stage.
 
 ## Exit criteria for stronger positioning language
 
@@ -90,4 +90,5 @@ Capture:
 
 - The exact cleanup stage should continue to be described as classical odd-even transposition-style machinery used as a correctness fallback.
 - The transport phase can still be described as experimental and project-specific in its current combination of weighted energy, 2-adic closeness, and accept-on-descent block moves.
+- The broader integer-sorting literature reinforces that "integer-specific" or "bit-structured" alone is not enough to justify novelty language.
 - No recorded source so far justifies stronger novelty wording or any performance-oriented claim.

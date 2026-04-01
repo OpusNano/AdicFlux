@@ -17,6 +17,9 @@ This document tracks the next correctness-first phase as repository-visible work
 - [x] Benchmark-readiness checklist v1 frozen
 - [x] Source-backed literature review task log activated
 - [x] Stability wording updated to reflect tagged-evidence status
+- [x] Broader tagged-identity stability search coverage added
+- [x] Initial citations expanded beyond the odd-even / local-exchange baseline
+- [x] Source-level `isSorted` doc comment added
 
 ## Active next-phase checklist
 
@@ -29,10 +32,8 @@ This document tracks the next correctness-first phase as repository-visible work
 
 ## Current open items
 
-- [x] Record the first real citations in `docs/literature-review-log.md`
-- [ ] Decide whether the tagged-evidence stability wording should remain as-is or be strengthened further only after broader search coverage
-- [ ] Review whether `isSorted` should gain a short code comment/doc comment in the Zig source itself
-- [ ] Add more citations beyond the initial odd-even / local-exchange baseline entries
+- [ ] Decide whether to cite a dedicated stable-sorting or local-permutation proof source beyond Knuth's general background
+- [ ] Continue expanding source-backed notes for Task 2 and Task 3 if they materially affect wording
 
 ## Suggested issue buckets
 

@@ -8,6 +8,8 @@ The repository still does not claim a complete end-to-end proof that equal integ
 
 The test suite now includes tagged-identity checks that simulate stable ordering obligations explicitly rather than relying on plain integer duplicates alone. Those tests have not found a counterexample in the current small exhaustive search and randomized stress coverage. That is stronger than a design intention alone, but it is still evidence rather than proof.
 
+After the broader tagged-search expansion currently in the repository, the project still keeps the same wording: the evidence is stronger, but not yet proof-grade.
+
 ## What is stability-friendly today
 
 - the key transform treats equal values as equal keys,
