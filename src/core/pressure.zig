@@ -30,6 +30,29 @@ pub fn compute(comptime T: type, block: []const T, cfg: Config, pressures: []i32
     }
 }
 
+pub fn computeFromKeys(comptime T: type, keys: []const key.KeyType(T), cfg: Config, pressures: []i32) void {
+    std.debug.assert(pressures.len >= keys.len);
+
+    @memset(pressures[0..keys.len], 0);
+    if (keys.len <= 1) return;
+
+    for (keys, 0..) |left_key, i| {
+        const end = @min(keys.len, i + cfg.neighborhood + 1);
+        var j = i + 1;
+        while (j < end) : (j += 1) {
+            const right_key = keys[j];
+            if (left_key > right_key) {
+                const w: i32 = @intCast(energy.pairWeightFromKeys(T, left_key, right_key, cfg));
+                pressures[i] += w;
+                pressures[j] -= w;
+            } else if (left_key < right_key) {
+                pressures[i] -= 1;
+                pressures[j] += 1;
+            }
+        }
+    }
+}
+
 pub fn proposalsFromPressure(pressures: []const i32, cfg: Config, proposals: []i8) void {
     std.debug.assert(proposals.len >= pressures.len);
 

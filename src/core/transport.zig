@@ -1,8 +1,10 @@
 const std = @import("std");
 const Config = @import("config.zig").Config;
 const energy = @import("energy.zig");
+const key = @import("key.zig");
 const pressure = @import("pressure.zig");
 const Stats = @import("stats.zig").Stats;
+const util = @import("../internal/util.zig");
 
 pub const BlockResult = struct {
     accepted: bool,
@@ -58,8 +60,16 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
     std.debug.assert(block.len <= Config.max_block_size);
     if (stats) |s| s.transport_blocks_visited += 1;
 
-    const before_energy = energy.blockEnergy(T, block, cfg);
-    if (block.len <= 1 or before_energy == 0) {
+    if (block.len <= 1 or util.isSorted(T, block)) {
+        if (stats) |s| s.transport_blocks_rejected += 1;
+        return .{ .accepted = false, .before_energy = 0, .after_energy = 0 };
+    }
+
+    var keys: [Config.max_block_size]key.KeyType(T) = undefined;
+    for (block, 0..) |value, i| keys[i] = key.biasedKey(T, value);
+
+    const before_energy = energy.blockEnergyFromKeys(T, keys[0..block.len], cfg);
+    if (before_energy == 0) {
         if (stats) |s| s.transport_blocks_rejected += 1;
         return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
     }
@@ -72,8 +82,9 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
     var desired: [Config.max_block_size]usize = undefined;
     var source_to_final: [Config.max_block_size]usize = undefined;
     var candidate: [Config.max_block_size]T = undefined;
+    var candidate_keys: [Config.max_block_size]key.KeyType(T) = undefined;
 
-    pressure.compute(T, block, cfg, pressures[0..block.len]);
+    pressure.computeFromKeys(T, keys[0..block.len], cfg, pressures[0..block.len]);
     pressure.proposalsFromPressure(pressures[0..block.len], cfg, proposals[0..block.len]);
 
     var changed = false;
@@ -95,9 +106,10 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
     std.debug.assert(isPermutation(source_to_final[0..block.len]));
     for (block, 0..) |value, source_index| {
         candidate[source_to_final[source_index]] = value;
+        candidate_keys[source_to_final[source_index]] = keys[source_index];
     }
 
-    const after_energy = energy.blockEnergy(T, candidate[0..block.len], cfg);
+    const after_energy = energy.blockEnergyFromKeys(T, candidate_keys[0..block.len], cfg);
     if (after_energy >= before_energy) {
         std.debug.assert(equalSlices(T, block, original[0..block.len]));
         if (stats) |s| s.transport_blocks_rejected += 1;

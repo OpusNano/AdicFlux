@@ -2,6 +2,8 @@ const std = @import("std");
 const Config = @import("config.zig").Config;
 const types = @import("types.zig");
 
+pub const KeyType = types.UnsignedOf;
+
 pub fn biasedKey(comptime T: type, value: T) types.UnsignedOf(T) {
     const info = @typeInfo(T);
     const U = types.UnsignedOf(T);
@@ -20,8 +22,12 @@ pub fn biasedKey(comptime T: type, value: T) types.UnsignedOf(T) {
 }
 
 pub fn closenessBonus(comptime T: type, left: T, right: T, cfg: Config) u8 {
+    return closenessBonusFromKeys(T, biasedKey(T, left), biasedKey(T, right), cfg);
+}
+
+pub fn closenessBonusFromKeys(comptime T: type, left_key: types.UnsignedOf(T), right_key: types.UnsignedOf(T), cfg: Config) u8 {
     const U = types.UnsignedOf(T);
-    const diff: U = biasedKey(T, left) ^ biasedKey(T, right);
+    const diff: U = left_key ^ right_key;
     if (diff == 0) return cfg.valuation_cap;
 
     const tz: usize = @ctz(diff);
@@ -36,4 +42,8 @@ pub fn compare(comptime T: type, left: T, right: T) std.math.Order {
 
 pub fn greaterThan(comptime T: type, left: T, right: T) bool {
     return left > right;
+}
+
+pub fn greaterThanKeys(comptime T: type, left_key: types.UnsignedOf(T), right_key: types.UnsignedOf(T)) bool {
+    return left_key > right_key;
 }
