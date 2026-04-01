@@ -29,13 +29,11 @@ pub fn closenessBonus(comptime T: type, left: T, right: T, cfg: Config) u8 {
 }
 
 pub fn compare(comptime T: type, left: T, right: T) std.math.Order {
-    const left_key = biasedKey(T, left);
-    const right_key = biasedKey(T, right);
-    if (left_key < right_key) return .lt;
-    if (left_key > right_key) return .gt;
+    if (left < right) return .lt;
+    if (left > right) return .gt;
     return .eq;
 }
 
 pub fn greaterThan(comptime T: type, left: T, right: T) bool {
-    return compare(T, left, right) == .gt;
+    return left > right;
 }
