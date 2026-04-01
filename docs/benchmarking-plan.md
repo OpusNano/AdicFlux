@@ -2,6 +2,10 @@
 
 This repository intentionally does not publish benchmark numbers yet.
 
+## Checklist version
+
+This document now serves as benchmark-readiness checklist v1 for the repository. Future changes should update this version deliberately rather than letting benchmark prerequisites drift implicitly.
+
 ## Hard gate: do not benchmark until all items below are true
 
 - public configuration fields are all semantically implemented or intentionally removed,

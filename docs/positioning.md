@@ -114,4 +114,6 @@ Preferred phrasing remains:
 
 Avoid stronger novelty phrasing until the checklist above has been worked through with actual sources.
 
+See `docs/literature-review-log.md` for the active source-backed task log derived from this checklist.
+
 Until that review is done, "experimental algorithm proposal" is the right framing.
