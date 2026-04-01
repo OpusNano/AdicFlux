@@ -23,7 +23,7 @@ pub fn sort(comptime T: type, xs: []T) void {
 
 pub fn sortWithConfig(comptime T: type, xs: []T, cfg: Config) void {
     util.assertIntegerType(T);
-    cfg.validate();
+    cfg.validate() catch |err| @panic(@errorName(err));
 
     if (xs.len <= 1) return;
 
@@ -41,7 +41,7 @@ pub fn sortWithConfig(comptime T: type, xs: []T, cfg: Config) void {
         if (!any_accepted) break;
     }
 
-    cleanup.exactCleanup(T, xs, null);
+    cleanup.exactCleanup(T, xs, cfg.cleanup_pass_limit);
 }
 
 pub fn isSorted(comptime T: type, xs: []const T) bool {

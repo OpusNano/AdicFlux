@@ -1,4 +1,5 @@
 test {
+    _ = @import("unit/config_test.zig");
     _ = @import("unit/key_test.zig");
     _ = @import("unit/energy_test.zig");
     _ = @import("unit/pressure_test.zig");

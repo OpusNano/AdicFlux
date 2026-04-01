@@ -28,4 +28,5 @@ Premature benchmarks would encourage overclaiming.
 
 - Stable target resolution is simple rather than asymptotically optimal.
 - Cleanup is exact and easy to reason about, but not fast in the worst case.
+- Full exactness depends on allowing cleanup to run to completion; diagnostic cleanup limits are intentionally not exact.
 - The energy uses a configurable capped valuation bonus so alternative weighting rules remain easy to test.

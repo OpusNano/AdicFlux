@@ -40,16 +40,20 @@ That yields a block-local permutation with these properties:
 
 The move is accepted only if the resulting block energy is strictly smaller than before.
 
+That is a local acceptance criterion. In the current repository it should not be read as a proof of global descent for the whole array.
+
 ## 5. Exact cleanup stage
 
-After transport rounds finish, AdicFlux runs odd-even adjacent cleanup until no swaps remain. This is the exact stage. It guarantees that the final output is sorted even if every transport proposal is rejected.
+After transport rounds finish, AdicFlux runs odd-even adjacent cleanup until no swaps remain. This is the exact stage. With the default configuration, it guarantees that the final output is sorted even if every transport proposal is rejected.
+
+The configuration also exposes `cleanup_pass_limit` for diagnostic runs. Using a finite limit intentionally weakens that guarantee because cleanup may stop before the array is sorted.
 
 ## 6. Stability note
 
-The implementation is designed to be stable:
+The implementation has several stability-friendly features:
 
 - equal keys are never treated as inversions,
 - cleanup swaps only strict inversions,
-- block conflict resolution is stable.
+- block conflict resolution is stable for equal desired targets.
 
-This repository still describes stability as an implementation property that should continue to be tested and documented rather than a formally completed theorem.
+This is not yet presented as a completed end-to-end proof of stability for every accepted transport move.

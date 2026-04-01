@@ -7,9 +7,9 @@ This document separates implemented costs from conjecture.
 - Block energy evaluation is `O(b^2)` for block size `b`.
 - Pressure computation is `O(b * neighborhood)`.
 - Stable target resolution is `O(b^2)` in the current insertion-sort-based implementation.
-- A transport round over `n` items is therefore conservatively `O(n * b)` to `O(n * b^2 / b)`, which simplifies to `O(n * b)` for the pressure part and `O(n * b)` blocks each doing `O(b^2)` local work, giving `O(n * b)`? More explicitly, with `n / b` blocks and `O(b^2)` work per block, transport is `O(n * b)`.
+- With `n / b` blocks and `O(b^2)` local work per block in the current implementation, one full transport round is conservatively `O(n * b)`.
 
-With the default fixed block size, the transport phase is linear in `n` with a larger constant, but that statement depends on treating the block size as a bounded tuning constant.
+If block size is treated as a fixed tuning constant, that makes the transport phase linear in `n` with a potentially large constant factor. If block size is allowed to scale with `n`, the bound should be read as `O(n * b)` instead.
 
 ## Cleanup complexity
 

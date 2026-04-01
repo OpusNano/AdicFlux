@@ -29,7 +29,19 @@ AdicFlux is a correctness-first implementation of an experimental integer sortin
 
 ## Correctness story
 
-The transport phase is heuristic and experimental. It may speed progress, but it is not relied on for exactness. Exactness comes from the cleanup phase: an odd-even adjacent inversion cleanup that repeatedly removes local inversions until the slice is sorted. Equal values are never swapped by cleanup, and block target resolution is stable, so the current implementation is intended to be stable for equal keys.
+The transport phase is heuristic and experimental. It may speed progress, but it is not relied on for exactness. Exactness comes from the cleanup phase: with the default configuration, odd-even adjacent inversion cleanup runs to completion and guarantees a sorted result even if every transport proposal is rejected.
+
+Accepted transport moves only establish a local fact: the chosen block-local weighted inversion energy strictly decreases for that block. The repository does not currently claim that this implies global progress beyond the final exact cleanup.
+
+## Stability status
+
+The current implementation aims to behave stably for equal integer keys, but that should be treated as an intended property rather than a proved guarantee.
+
+- cleanup swaps only strict inversions,
+- equal pairs contribute no direct pressure,
+- target resolution is stable when multiple elements request the same target.
+
+That is encouraging, but the repository does not yet claim a full end-to-end stability proof for all transport interactions.
 
 ## Build
 
@@ -65,6 +77,8 @@ const cfg = adicflux.Config{
 
 adicflux.sortWithConfig(i64, xs[0..], cfg);
 ```
+
+`cleanup_pass_limit` is also available for diagnostic/testing runs. Leaving it as `null` preserves the exactness guarantee. Supplying a finite limit may stop cleanup early and therefore may leave the array not fully sorted.
 
 ## Layout
 
