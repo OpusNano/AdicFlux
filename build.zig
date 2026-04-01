@@ -67,4 +67,22 @@ pub fn build(b: *std.Build) void {
 
     const test_step = b.step("test", "Run AdicFlux tests");
     test_step.dependOn(&run_tests.step);
+
+    const bench_mod = b.createModule(.{
+        .root_source_file = b.path("bench/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    bench_mod.addImport("adicflux", adicflux_mod);
+
+    const bench_exe = b.addExecutable(.{
+        .name = "adicflux-bench",
+        .root_module = bench_mod,
+    });
+
+    const run_bench = b.addRunArtifact(bench_exe);
+    if (b.args) |args| run_bench.addArgs(args);
+
+    const bench_step = b.step("bench", "Run local benchmark harness");
+    bench_step.dependOn(&run_bench.step);
 }
