@@ -6,6 +6,24 @@ This repository intentionally does not publish benchmark numbers yet.
 
 This document now serves as benchmark-readiness checklist v1 for the repository. Future changes should update this version deliberately rather than letting benchmark prerequisites drift implicitly.
 
+## Local harness
+
+The repository now includes a local-only benchmark harness runnable with:
+
+```sh
+zig build bench -Doptimize=ReleaseFast
+```
+
+The harness is intended for developer measurement and tuning, not for CI and not for README marketing claims.
+
+It currently:
+
+- benchmarks AdicFlux default sorting against a Zig standard-library baseline,
+- emits structured CSV-style rows,
+- covers multiple dataset families and sizes,
+- validates AdicFlux output against a trusted baseline before timed loops,
+- reports transport and cleanup counters from a validation run.
+
 ## Hard gate: do not benchmark until all items below are true
 
 - public configuration fields are all semantically implemented or intentionally removed,
