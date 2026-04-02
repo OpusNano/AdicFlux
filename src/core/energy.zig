@@ -1,6 +1,66 @@
 const Config = @import("config.zig").Config;
 const key = @import("key.zig");
 
+pub fn collectDistinctGroups(
+    comptime T: type,
+    keys: []const key.KeyType(T),
+    distinct_keys_out: []key.KeyType(T),
+    group_ids_out: []u8,
+) usize {
+    var distinct_count: usize = 0;
+
+    for (keys) |value| {
+        var found = false;
+        for (distinct_keys_out[0..distinct_count]) |existing| {
+            if (existing == value) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            distinct_keys_out[distinct_count] = value;
+            distinct_count += 1;
+        }
+    }
+
+    var i: usize = 1;
+    while (i < distinct_count) : (i += 1) {
+        const current = distinct_keys_out[i];
+        var j = i;
+        while (j > 0 and distinct_keys_out[j - 1] > current) : (j -= 1) {
+            distinct_keys_out[j] = distinct_keys_out[j - 1];
+        }
+        distinct_keys_out[j] = current;
+    }
+
+    for (keys, 0..) |value, idx| {
+        var group: usize = 0;
+        while (group < distinct_count and distinct_keys_out[group] != value) : (group += 1) {}
+        group_ids_out[idx] = @intCast(group);
+    }
+
+    return distinct_count;
+}
+
+pub fn buildGroupWeightMatrix(
+    comptime T: type,
+    distinct_keys: []const key.KeyType(T),
+    cfg: Config,
+    weight_matrix: []u16,
+) void {
+    const stride = distinct_keys.len;
+    for (distinct_keys, 0..) |left_key, i| {
+        for (distinct_keys, 0..) |right_key, j| {
+            const index = i * stride + j;
+            if (left_key > right_key) {
+                weight_matrix[index] = @intCast(pairWeightFromKeys(T, left_key, right_key, cfg));
+            } else {
+                weight_matrix[index] = 0;
+            }
+        }
+    }
+}
+
 pub fn pairWeight(comptime T: type, left: T, right: T, cfg: Config) u64 {
     return 1 + key.closenessBonus(T, left, right, cfg);
 }
@@ -38,6 +98,24 @@ pub fn blockEnergyFromKeys(comptime T: type, keys: []const key.KeyType(T), cfg: 
             total += pairEnergyFromKeys(T, left_key, keys[j], cfg);
         }
     }
+    return total;
+}
+
+pub fn blockEnergyFromGroupIds(group_ids: []const u8, distinct_count: usize, weight_matrix: []const u16) u64 {
+    var counts: [Config.max_block_size]usize = [_]usize{0} ** Config.max_block_size;
+    var total: u64 = 0;
+
+    var idx = group_ids.len;
+    while (idx > 0) {
+        idx -= 1;
+        const group = group_ids[idx];
+        var smaller: usize = 0;
+        while (smaller < group) : (smaller += 1) {
+            total += @as(u64, counts[smaller]) * weight_matrix[@as(usize, group) * distinct_count + smaller];
+        }
+        counts[group] += 1;
+    }
+
     return total;
 }
 

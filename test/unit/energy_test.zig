@@ -59,3 +59,20 @@ test "moved-only permutation delta energy matches exact recomputation" {
 
     try std.testing.expectEqual(after_exact, after_delta);
 }
+
+test "grouped energy matches exact recomputation on duplicate-heavy block" {
+    const cfg = Config{ .valuation_cap = 8 };
+    const xs = [_]i32{ 2, 2, 1, 1, 0, 0, 2, 1 };
+    var keys = [_]key.KeyType(i32){ 0, 0, 0, 0, 0, 0, 0, 0 };
+    var distinct_keys = [_]key.KeyType(i32){0} ** 8;
+    var group_ids = [_]u8{0} ** 8;
+    var weights = [_]u16{0} ** (8 * 8);
+
+    for (xs, 0..) |value, i| keys[i] = key.biasedKey(i32, value);
+    const distinct_count = energy.collectDistinctGroups(i32, keys[0..], distinct_keys[0..], group_ids[0..]);
+    energy.buildGroupWeightMatrix(i32, distinct_keys[0..distinct_count], cfg, weights[0 .. distinct_count * distinct_count]);
+
+    const exact = energy.blockEnergy(i32, xs[0..], cfg);
+    const grouped = energy.blockEnergyFromGroupIds(group_ids[0..], distinct_count, weights[0 .. distinct_count * distinct_count]);
+    try std.testing.expectEqual(exact, grouped);
+}

@@ -19,6 +19,32 @@ fn useMovedDeltaPath(block_len: usize, moved_count: usize) bool {
     return affected_pairs * 2 < total_pairs;
 }
 
+fn useGroupedExactPath(block_len: usize, distinct_count: usize) bool {
+    return distinct_count <= 8 and distinct_count * 4 <= block_len;
+}
+
+fn cheapDistinctCount(comptime T: type, keys: []const key.KeyType(T)) usize {
+    const table_len = Config.max_block_size * 2;
+    var used: [table_len]bool = [_]bool{false} ** table_len;
+    var table: [table_len]key.KeyType(T) = undefined;
+    var count: usize = 0;
+
+    for (keys) |value| {
+        var hash: usize = @intCast(value ^ (value >> @min(@bitSizeOf(key.KeyType(T)) / 2, 16)));
+        hash %= table_len;
+        while (used[hash]) : (hash = (hash + 1) % table_len) {
+            if (table[hash] == value) break;
+        }
+        if (!used[hash]) {
+            used[hash] = true;
+            table[hash] = value;
+            count += 1;
+        }
+    }
+
+    return count;
+}
+
 fn isPermutation(mapping: []const usize) bool {
     var seen: [Config.max_block_size]bool = [_]bool{false} ** Config.max_block_size;
     for (mapping) |value| {
@@ -76,8 +102,26 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
     var desired: [Config.max_block_size]usize = undefined;
     var source_to_final: [Config.max_block_size]usize = undefined;
     var moved_indices: [Config.max_block_size]usize = undefined;
+    var group_ids: [Config.max_block_size]u8 = undefined;
+    var final_group_ids: [Config.max_block_size]u8 = undefined;
+    var distinct_keys: [Config.max_block_size]key.KeyType(T) = undefined;
+    var weight_matrix: [Config.max_block_size * Config.max_block_size]u16 = undefined;
 
-    const before_energy = pressure.computeFromKeysWithEnergy(T, keys[0..block.len], cfg, pressures[0..block.len]);
+    const estimated_distinct = cheapDistinctCount(T, keys[0..block.len]);
+    const grouped_path = useGroupedExactPath(block.len, estimated_distinct);
+    const distinct_count = if (grouped_path)
+        energy.collectDistinctGroups(T, keys[0..block.len], distinct_keys[0..block.len], group_ids[0..block.len])
+    else
+        0;
+
+    const before_energy = if (grouped_path)
+        blk: {
+            energy.buildGroupWeightMatrix(T, distinct_keys[0..distinct_count], cfg, weight_matrix[0 .. distinct_count * distinct_count]);
+            pressure.computeFromKeys(T, keys[0..block.len], cfg, pressures[0..block.len]);
+            break :blk energy.blockEnergyFromGroupIds(group_ids[0..block.len], distinct_count, weight_matrix[0 .. distinct_count * distinct_count]);
+        }
+    else
+        pressure.computeFromKeysWithEnergy(T, keys[0..block.len], cfg, pressures[0..block.len]);
     if (before_energy == 0) {
         if (stats) |s| s.transport_blocks_rejected += 1;
         return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
@@ -116,7 +160,14 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
         return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
     }
 
-    const after_energy = if (useMovedDeltaPath(block.len, moved_count))
+    const after_energy = if (grouped_path)
+        blk: {
+            for (group_ids[0..block.len], 0..) |group, source_index| {
+                final_group_ids[source_to_final[source_index]] = group;
+            }
+            break :blk energy.blockEnergyFromGroupIds(final_group_ids[0..block.len], distinct_count, weight_matrix[0 .. distinct_count * distinct_count]);
+        }
+    else if (useMovedDeltaPath(block.len, moved_count))
         energy.energyAfterPermutationFromMovedKeys(
             T,
             keys[0..block.len],
