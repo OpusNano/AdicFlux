@@ -22,6 +22,7 @@ This document tracks the next correctness-first phase as repository-visible work
 - [x] Source-level `isSorted` doc comment added
 - [x] Config-matrix differential and invariant test layer added
 - [x] Local benchmark harness and first measured optimization pass added
+- [x] Exact acceptance-cost optimization using permutation delta energy added
 
 ## Active next-phase checklist
 
@@ -57,6 +58,7 @@ This document tracks the next correctness-first phase as repository-visible work
 - extend baseline set beyond the first stdlib comparison
 - keep benchmark datasets aligned with correctness stress patterns
 - use benchmark observations to justify small, auditable optimization passes
+- continue reducing transport acceptance cost without weakening exactness
 
 ### Docs and positioning
 

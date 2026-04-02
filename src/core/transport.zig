@@ -25,10 +25,6 @@ fn isPermutation(mapping: []const usize) bool {
     return true;
 }
 
-fn equalSlices(comptime T: type, lhs: []const T, rhs: []const T) bool {
-    return std.mem.eql(T, lhs, rhs);
-}
-
 pub fn resolveTargets(desired: []const usize, source_to_final: []usize) void {
     std.debug.assert(source_to_final.len >= desired.len);
 
@@ -74,15 +70,10 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
         return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
     }
 
-    var original: [Config.max_block_size]T = undefined;
-    std.mem.copyForwards(T, original[0..block.len], block);
-
     var pressures: [Config.max_block_size]i32 = undefined;
     var proposals: [Config.max_block_size]i8 = undefined;
     var desired: [Config.max_block_size]usize = undefined;
     var source_to_final: [Config.max_block_size]usize = undefined;
-    var candidate: [Config.max_block_size]T = undefined;
-    var candidate_keys: [Config.max_block_size]key.KeyType(T) = undefined;
 
     pressure.computeFromKeys(T, keys[0..block.len], cfg, pressures[0..block.len]);
     pressure.proposalsFromPressure(pressures[0..block.len], cfg, proposals[0..block.len]);
@@ -104,18 +95,23 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
 
     resolveTargets(desired[0..block.len], source_to_final[0..block.len]);
     std.debug.assert(isPermutation(source_to_final[0..block.len]));
-    for (block, 0..) |value, source_index| {
-        candidate[source_to_final[source_index]] = value;
-        candidate_keys[source_to_final[source_index]] = keys[source_index];
-    }
 
-    const after_energy = energy.blockEnergyFromKeys(T, candidate_keys[0..block.len], cfg);
+    const after_energy = energy.energyAfterPermutationFromKeys(
+        T,
+        keys[0..block.len],
+        source_to_final[0..block.len],
+        before_energy,
+        cfg,
+    );
     if (after_energy >= before_energy) {
-        std.debug.assert(equalSlices(T, block, original[0..block.len]));
         if (stats) |s| s.transport_blocks_rejected += 1;
         return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
     }
 
+    var candidate: [Config.max_block_size]T = undefined;
+    for (block, 0..) |value, source_index| {
+        candidate[source_to_final[source_index]] = value;
+    }
     std.mem.copyForwards(T, block, candidate[0..block.len]);
     if (stats) |s| s.transport_blocks_accepted += 1;
     return .{ .accepted = true, .before_energy = before_energy, .after_energy = after_energy };

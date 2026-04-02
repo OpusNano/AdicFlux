@@ -40,3 +40,29 @@ pub fn blockEnergyFromKeys(comptime T: type, keys: []const key.KeyType(T), cfg: 
     }
     return total;
 }
+
+pub fn energyAfterPermutationFromKeys(
+    comptime T: type,
+    keys: []const key.KeyType(T),
+    source_to_final: []const usize,
+    before_energy: u64,
+    cfg: Config,
+) u64 {
+    var after_energy = before_energy;
+
+    for (keys, 0..) |left_key, i| {
+        var j = i + 1;
+        while (j < keys.len) : (j += 1) {
+            if (source_to_final[i] < source_to_final[j]) continue;
+
+            const weight = pairWeightFromKeys(T, left_key, keys[j], cfg);
+            if (left_key > keys[j]) {
+                after_energy -= weight;
+            } else if (left_key < keys[j]) {
+                after_energy += weight;
+            }
+        }
+    }
+
+    return after_energy;
+}
