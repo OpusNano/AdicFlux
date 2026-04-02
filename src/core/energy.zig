@@ -66,3 +66,40 @@ pub fn energyAfterPermutationFromKeys(
 
     return after_energy;
 }
+
+pub fn energyAfterPermutationFromMovedKeys(
+    comptime T: type,
+    keys: []const key.KeyType(T),
+    source_to_final: []const usize,
+    moved_indices: []const usize,
+    before_energy: u64,
+    cfg: Config,
+) u64 {
+    var moved_mask: [Config.max_block_size]bool = [_]bool{false} ** Config.max_block_size;
+    for (moved_indices) |idx| moved_mask[idx] = true;
+
+    var after_energy = before_energy;
+    for (moved_indices) |moved_idx| {
+        var other: usize = 0;
+        while (other < keys.len) : (other += 1) {
+            if (other == moved_idx) continue;
+            if (moved_mask[other] and other < moved_idx) continue;
+
+            const left_index = @min(moved_idx, other);
+            const right_index = @max(moved_idx, other);
+            const new_ordered = source_to_final[left_index] < source_to_final[right_index];
+            if (new_ordered) continue;
+
+            const left_key = keys[left_index];
+            const right_key = keys[right_index];
+            const weight = pairWeightFromKeys(T, left_key, right_key, cfg);
+            if (left_key > right_key) {
+                after_energy -= weight;
+            } else if (left_key < right_key) {
+                after_energy += weight;
+            }
+        }
+    }
+
+    return after_energy;
+}

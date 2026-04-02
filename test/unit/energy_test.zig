@@ -39,3 +39,23 @@ test "permutation delta energy matches exact recomputation" {
 
     try std.testing.expectEqual(after_exact, after_delta);
 }
+
+test "moved-only permutation delta energy matches exact recomputation" {
+    const cfg = Config{ .valuation_cap = 8 };
+    const xs = [_]i32{ 0, 1, 3, 2, 4, 5 };
+    const perm = [_]usize{ 0, 1, 3, 2, 4, 5 };
+    var permuted = [_]i32{ 0, 0, 0, 0, 0, 0 };
+    var keys = [_]key.KeyType(i32){ 0, 0, 0, 0, 0, 0 };
+    const moved = [_]usize{ 2, 3 };
+
+    for (xs, 0..) |value, i| {
+        permuted[perm[i]] = value;
+        keys[i] = key.biasedKey(i32, value);
+    }
+
+    const before = energy.blockEnergy(i32, xs[0..], cfg);
+    const after_exact = energy.blockEnergy(i32, permuted[0..], cfg);
+    const after_delta = energy.energyAfterPermutationFromMovedKeys(i32, keys[0..], perm[0..], moved[0..], before, cfg);
+
+    try std.testing.expectEqual(after_exact, after_delta);
+}

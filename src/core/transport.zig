@@ -12,6 +12,13 @@ pub const BlockResult = struct {
     after_energy: u64,
 };
 
+fn useMovedDeltaPath(block_len: usize, moved_count: usize) bool {
+    if (moved_count <= 1) return true;
+    const total_pairs = block_len * (block_len - 1) / 2;
+    const affected_pairs = moved_count * (block_len - moved_count) + moved_count * (moved_count - 1) / 2;
+    return affected_pairs * 2 < total_pairs;
+}
+
 fn isPermutation(mapping: []const usize) bool {
     var seen: [Config.max_block_size]bool = [_]bool{false} ** Config.max_block_size;
     for (mapping) |value| {
@@ -64,18 +71,18 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
     var keys: [Config.max_block_size]key.KeyType(T) = undefined;
     for (block, 0..) |value, i| keys[i] = key.biasedKey(T, value);
 
-    const before_energy = energy.blockEnergyFromKeys(T, keys[0..block.len], cfg);
+    var pressures: [Config.max_block_size]i32 = undefined;
+    var proposals: [Config.max_block_size]i8 = undefined;
+    var desired: [Config.max_block_size]usize = undefined;
+    var source_to_final: [Config.max_block_size]usize = undefined;
+    var moved_indices: [Config.max_block_size]usize = undefined;
+
+    const before_energy = pressure.computeFromKeysWithEnergy(T, keys[0..block.len], cfg, pressures[0..block.len]);
     if (before_energy == 0) {
         if (stats) |s| s.transport_blocks_rejected += 1;
         return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
     }
 
-    var pressures: [Config.max_block_size]i32 = undefined;
-    var proposals: [Config.max_block_size]i8 = undefined;
-    var desired: [Config.max_block_size]usize = undefined;
-    var source_to_final: [Config.max_block_size]usize = undefined;
-
-    pressure.computeFromKeys(T, keys[0..block.len], cfg, pressures[0..block.len]);
     pressure.proposalsFromPressure(pressures[0..block.len], cfg, proposals[0..block.len]);
 
     var changed = false;
@@ -96,13 +103,36 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
     resolveTargets(desired[0..block.len], source_to_final[0..block.len]);
     std.debug.assert(isPermutation(source_to_final[0..block.len]));
 
-    const after_energy = energy.energyAfterPermutationFromKeys(
-        T,
-        keys[0..block.len],
-        source_to_final[0..block.len],
-        before_energy,
-        cfg,
-    );
+    var moved_count: usize = 0;
+    for (source_to_final[0..block.len], 0..) |final_index, source_index| {
+        if (final_index != source_index) {
+            moved_indices[moved_count] = source_index;
+            moved_count += 1;
+        }
+    }
+
+    if (moved_count == 0) {
+        if (stats) |s| s.transport_blocks_rejected += 1;
+        return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
+    }
+
+    const after_energy = if (useMovedDeltaPath(block.len, moved_count))
+        energy.energyAfterPermutationFromMovedKeys(
+            T,
+            keys[0..block.len],
+            source_to_final[0..block.len],
+            moved_indices[0..moved_count],
+            before_energy,
+            cfg,
+        )
+    else
+        energy.energyAfterPermutationFromKeys(
+            T,
+            keys[0..block.len],
+            source_to_final[0..block.len],
+            before_energy,
+            cfg,
+        );
     if (after_energy >= before_energy) {
         if (stats) |s| s.transport_blocks_rejected += 1;
         return .{ .accepted = false, .before_energy = before_energy, .after_energy = before_energy };
