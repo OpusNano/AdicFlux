@@ -66,10 +66,11 @@ test "grouped energy matches exact recomputation on duplicate-heavy block" {
     var keys = [_]key.KeyType(i32){ 0, 0, 0, 0, 0, 0, 0, 0 };
     var distinct_keys = [_]key.KeyType(i32){0} ** 8;
     var group_ids = [_]u8{0} ** 8;
+    var group_counts = [_]usize{0} ** 8;
     var weights = [_]u16{0} ** (8 * 8);
 
     for (xs, 0..) |value, i| keys[i] = key.biasedKey(i32, value);
-    const distinct_count = energy.collectDistinctGroups(i32, keys[0..], distinct_keys[0..], group_ids[0..]);
+    const distinct_count = energy.buildGroupedState(i32, keys[0..], distinct_keys[0..], group_ids[0..], group_counts[0..]);
     energy.buildGroupWeightMatrix(i32, distinct_keys[0..distinct_count], cfg, weights[0 .. distinct_count * distinct_count]);
 
     const exact = energy.blockEnergy(i32, xs[0..], cfg);

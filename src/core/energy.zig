@@ -1,42 +1,54 @@
 const Config = @import("config.zig").Config;
 const key = @import("key.zig");
 
-pub fn collectDistinctGroups(
+pub fn buildGroupedState(
     comptime T: type,
     keys: []const key.KeyType(T),
     distinct_keys_out: []key.KeyType(T),
     group_ids_out: []u8,
+    group_counts_out: []usize,
 ) usize {
     var distinct_count: usize = 0;
-
-    for (keys) |value| {
-        var found = false;
-        for (distinct_keys_out[0..distinct_count]) |existing| {
-            if (existing == value) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            distinct_keys_out[distinct_count] = value;
-            distinct_count += 1;
-        }
-    }
-
-    var i: usize = 1;
-    while (i < distinct_count) : (i += 1) {
-        const current = distinct_keys_out[i];
-        var j = i;
-        while (j > 0 and distinct_keys_out[j - 1] > current) : (j -= 1) {
-            distinct_keys_out[j] = distinct_keys_out[j - 1];
-        }
-        distinct_keys_out[j] = current;
-    }
+    @memset(group_counts_out, 0);
 
     for (keys, 0..) |value, idx| {
         var group: usize = 0;
         while (group < distinct_count and distinct_keys_out[group] != value) : (group += 1) {}
+        if (group == distinct_count) {
+            distinct_keys_out[distinct_count] = value;
+            distinct_count += 1;
+        }
         group_ids_out[idx] = @intCast(group);
+        group_counts_out[group] += 1;
+    }
+
+    var sorted_old_ids: [Config.max_block_size]u8 = undefined;
+    for (0..distinct_count) |i| sorted_old_ids[i] = @intCast(i);
+
+    var i: usize = 1;
+    while (i < distinct_count) : (i += 1) {
+        const current_id = sorted_old_ids[i];
+        const current_key = distinct_keys_out[current_id];
+        var j = i;
+        while (j > 0 and distinct_keys_out[sorted_old_ids[j - 1]] > current_key) : (j -= 1) {
+            sorted_old_ids[j] = sorted_old_ids[j - 1];
+        }
+        sorted_old_ids[j] = current_id;
+    }
+
+    var sorted_keys: [Config.max_block_size]key.KeyType(T) = undefined;
+    var sorted_counts: [Config.max_block_size]usize = undefined;
+    var remap: [Config.max_block_size]u8 = undefined;
+    for (sorted_old_ids[0..distinct_count], 0..) |old_id, new_id| {
+        sorted_keys[new_id] = distinct_keys_out[old_id];
+        sorted_counts[new_id] = group_counts_out[old_id];
+        remap[old_id] = @intCast(new_id);
+    }
+    @memcpy(distinct_keys_out[0..distinct_count], sorted_keys[0..distinct_count]);
+    @memcpy(group_counts_out[0..distinct_count], sorted_counts[0..distinct_count]);
+
+    for (group_ids_out[0..keys.len]) |*group| {
+        group.* = remap[group.*];
     }
 
     return distinct_count;

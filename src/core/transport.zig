@@ -105,12 +105,13 @@ pub fn tryTransportBlock(comptime T: type, block: []T, cfg: Config, stats: ?*Sta
     var group_ids: [Config.max_block_size]u8 = undefined;
     var final_group_ids: [Config.max_block_size]u8 = undefined;
     var distinct_keys: [Config.max_block_size]key.KeyType(T) = undefined;
+    var group_counts: [Config.max_block_size]usize = undefined;
     var weight_matrix: [Config.max_block_size * Config.max_block_size]u16 = undefined;
 
     const estimated_distinct = cheapDistinctCount(T, keys[0..block.len]);
     const grouped_path = useGroupedExactPath(block.len, estimated_distinct);
     const distinct_count = if (grouped_path)
-        energy.collectDistinctGroups(T, keys[0..block.len], distinct_keys[0..block.len], group_ids[0..block.len])
+        energy.buildGroupedState(T, keys[0..block.len], distinct_keys[0..block.len], group_ids[0..block.len], group_counts[0..block.len])
     else
         0;
 

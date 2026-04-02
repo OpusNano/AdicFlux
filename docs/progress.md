@@ -25,6 +25,7 @@ This document tracks the next correctness-first phase as repository-visible work
 - [x] Exact acceptance-cost optimization using permutation delta energy added
 - [x] Duplicate-aware grouped exact evaluator path added
 - [x] Benchmark filtering and evaluator-path counters added for tuning loops
+- [x] One-pass grouped-state construction for low-cardinality blocks added
 
 ## Active next-phase checklist
 
