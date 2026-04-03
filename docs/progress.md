@@ -1,6 +1,6 @@
 # Progress Tracking
 
-This document tracks the next correctness-first phase as repository-visible work items.
+This document now serves as a compact archive of the best stable milestone and the research trail that followed it.
 
 ## Completed
 
@@ -26,48 +26,31 @@ This document tracks the next correctness-first phase as repository-visible work
 - [x] Duplicate-aware grouped exact evaluator path added
 - [x] Benchmark filtering and evaluator-path counters added for tuning loops
 - [x] One-pass grouped-state construction for low-cardinality blocks added
+- [x] Grouped-window pressure compression landed as stable milestone `7d12617`
+- [x] Repository finalized as an honest research artifact rather than a benchmark-claim project
 
-## Active next-phase checklist
+## Stable conclusion
 
-- [x] Decide whether tagged-identity evidence is strong enough to strengthen or further narrow stability wording
-- [x] Add more stats-based convergence tests around transport acceptance and cleanup work
-- [x] Expand literature-positioning notes into a review checklist with citations/tasks
-- [x] Open source-backed literature review tasks from the new checklist
-- [x] Decide whether `isSorted` remains part of the long-term public API
-- [x] Freeze a benchmark-readiness checklist version before any benchmark harness is added
+- Best stable code milestone: `7d12617`
+- Strongest confirmed optimization line: grouped duplicate-heavy pressure compression
+- Broad generic-path optimization attempts were mostly rejected after measurement
+- No tested production niche beat straightforward baselines convincingly enough to justify stronger positioning
 
-## Current open items
+## Research trail kept off-mainline
 
-- [ ] Decide whether to cite a dedicated stable-sorting or local-permutation proof source beyond Knuth's general background
-- [ ] Continue expanding source-backed notes for Task 2 and Task 3 if they materially affect wording
+- residue-tree experiments
+- frontier / narrow-breakpoint experiments
+- cohort and segment transport ideas
+- signature-bucket pressure compression
+- persistent-field reuse
+- flux transport variants
+- scheduler / overlap-graph execution models
+- specialist low-cardinality pivot
+- sparse-edit repair pivot
 
-## Suggested issue buckets
+## Remaining value
 
-### Correctness and semantics
-
-- stability proof obligations
-- cleanup-limit semantics and diagnostics
-- transport local-vs-global invariant documentation
-
-### Testing
-
-- larger exhaustive tagged-identity searches where still tractable
-- additional structured duplicate-heavy adversarial fixtures
-- convergence/accounting tests using debug counters
-- continued cross-config differential coverage as implementation changes land
-
-### Benchmarking and tuning
-
-- extend baseline set beyond the first stdlib comparison
-- keep benchmark datasets aligned with correctness stress patterns
-- use benchmark observations to justify small, auditable optimization passes
-- continue reducing transport acceptance cost without weakening exactness
-- improve duplicate-heavy paths without regressing transport-first semantics
-
-### Docs and positioning
-
-- literature review checklist
-- source-backed literature review issues
-- literature review log with actual citations
-- algorithm-family comparison notes with citations
-- API surface notes for unstable test support
+- compact exact implementation of a 2-adic local-transport sorter
+- extensive correctness/property tests
+- benchmark harness and negative-results record
+- useful reference point for future experimental sorting work in Zig
